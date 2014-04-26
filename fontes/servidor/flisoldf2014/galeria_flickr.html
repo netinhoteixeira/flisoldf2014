@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Flisol/DF 2014 - Apache Cordova</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/simplex/bootstrap.min.css" rel="stylesheet">
+        <link href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" rel="stylesheet" />
+        <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+        <style>
+            .col-md-8 {
+                padding: 0;
+            }
+
+            #mapa {
+                height: 250px;
+            }
+
+            #posicao {
+                font-weight: bold;
+            }
+
+            #foto-area {
+                display: none;
+            }
+
+            #titulo {
+                font-weight: bold;
+            }
+
+            #foto {
+                width: 100%;
+            }
+
+            #autor {
+                text-align: right;
+                display: block;
+            }
+
+            #fotos-total {
+                font-weight: bold;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Flisol/DF 2014 - Apache Cordova</h1>
+                <h4>por Francisco Ernesto Teixeira - <a href="mailto:fco.ernesto@gmail.com?subject=Flisol/DF 2014 - Apache Cordova">fco.ernesto@gmail.com</a></h4>
+            </header>
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>Mapinha<span id="posicao"></span></h5>
+                        <div id="mapa"></div>
+
+                        <div id="foto-area">
+                            <h5>Fotinha: <span id="titulo"></span></h5>
+                            <img id="foto" />
+                            <span id="autor">por Jurandir em 99/99/2013 99:99h</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Fotinhas <span id="fotos-total"></span></h5>
+                        <div id="galeria"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+        <script>
+            var mapa, fundo, posicao, marcador;
+
+            $(document).ready(function() {
+                mapa = L.map('mapa');
+                mapa.setView([-15.7979586, -47.8697971], 13);
+
+                fundo = new L.TileLayer('http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                    attribution: 'Dados, imagens e informações do mapa providos por <a href="http://open.mapquest.co.uk" target="_blank">MapQuest</a>, <a href = "http://www.openstreetmap.org/" target = "_blank"> OpenStreetMap </a> e colaboradores.',
+                    subdomains: ['otile1', 'otile2', 'otile3', 'otile4']});
+                fundo.addTo(mapa);
+
+                $.ajax({
+                    url: (window.location.protocol === 'https:' ?
+                            'https://secure' : 'http://api') +
+                            '.flickr.com/services/rest/',
+                    data: {
+                        format: 'json',
+                        method: 'flickr.interestingness.getList',
+                        api_key: 'ad72003925eb7748113fbf6906cdabef'
+                    },
+                    dataType: 'jsonp',
+                    jsonp: 'jsoncallback'
+                }).done(function(result) {
+                    var galeria, baseUrl;
+
+                    galeria = $('#galeria');
+
+                    $('#fotos-total').text(result.photos.photo.length);
+
+                    // Add the demo images as links with thumbnails to the page:
+                    $.each(result.photos.photo, function(index, photo) {
+                        baseUrl = 'http://farm' + photo.farm + '.static.flickr.com/' +
+                                photo.server + '/' + photo.id + '_' + photo.secret;
+
+                        $('<a/>')
+                                .attr('href', baseUrl + '_b.jpg')
+                                .attr('title', photo.title)
+                                .append(
+                                        $('<img>').attr('src', baseUrl + '_s.jpg')
+                                        .data('latitude', getRandomInRange(-180, 180, 3))
+                                        .data('longitude', getRandomInRange(-180, 180, 5))
+                                        )
+                                .appendTo(galeria);
+                    });
+
+                    $('a', galeria).click(function(e) {
+                        var img = $('img', this);
+
+                        $('#titulo').text($(this).attr('title'));
+                        $('#foto').attr('src', $(this).attr('href'));
+                        $('#foto-area').show();
+
+                        $('#posicao').text(' (' + $(img).data('longitude') + ', ' + $(img).data('longitude') + ')');
+                        posicao = new L.LatLng($(img).data('longitude'), $(img).data('longitude'));
+                        mapa.panTo(posicao);
+
+
+                        if (typeof marcador !== 'undefined') {
+                            mapa.removeLayer(marcador);
+                        }
+
+                        marcador = new L.Marker(posicao).addTo(mapa);
+
+                        e.preventDefault();
+                    });
+                });
+            });
+
+            function getRandomInRange(from, to, fixed) {
+                return (Math.random() * (to - from) + from).toFixed(fixed) * 1;
+                // .toFixed() returns string, so ' * 1' is a trick to convert to number
+            }
+            // getRandomInRange(-180, 180, 3)
+        </script>
+    </body>
+</html>

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Flisol/DF 2014 - Apache Cordova</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link href="http://netdna.bootstrapcdn.com/bootswatch/3.1.1/simplex/bootstrap.min.css" rel="stylesheet">
+        <link href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" rel="stylesheet" />
+        <link href="http://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+        <style>
+            .col-md-8 {
+                padding: 0;
+            }
+
+            @media (max-width: 767px) {
+
+                .col-md-4 {
+                    padding: 0;
+                }
+
+            }
+
+            #mapa {
+                height: 250px;
+            }
+
+            #posicao {
+                font-weight: bold;
+            }
+
+            #foto-area {
+                display: none;
+            }
+
+            #titulo {
+                font-weight: bold;
+            }
+
+            #foto {
+                width: 100%;
+            }
+
+            #autor {
+                text-align: right;
+                display: block;
+            }
+
+            #fotos-total {
+                font-weight: bold;
+            }
+
+            .amostra {
+                width: 75px;
+                height: 75px;
+                float: left;
+                overflow: hidden;
+                position: relative;
+                text-align: center;
+                cursor: pointer;
+            }
+
+            .amostra .mascara {
+                width: 75px;
+                height: 75px;
+                position: absolute;
+                overflow: hidden;
+                top: 0;
+                left: 0
+            }
+
+            .amostra img {
+                display: block;
+                position: relative
+            }
+
+            .amostra h2 {
+                text-transform: uppercase;
+                color: #fff;
+                text-align: center;
+                position: relative;
+                font-size: 8px;
+                background: rgba(0, 0, 0, 0.8);
+            }
+
+            .amostra p {
+                font-size: 6px;
+                position: relative;
+                color: #fff;
+                text-align: center
+            }
+
+            .amostra img { 
+                transform: scaleY(1);
+                transition: all 0.3s ease-in-out;
+            }
+
+            .amostra .mascara { 
+                background-color: #222;
+                transition: all 0.5s linear;
+                opacity: 0;
+            } 
+
+            .amostra h2{
+                border-bottom: 1px solid #666;
+                padding-bottom: 5px;
+                background: transparent;
+                transform: scale(0);
+                color: #fff;
+                transition: all 0.5s linear;
+                opacity: 0;
+            }
+
+            .amostra p {
+                color: #fff;
+                opacity: 0;
+                transform: scale(0);
+                transition: all 0.5s linear;
+            }
+
+            .amostra:hover img { 
+                transform: scale(10);
+                opacity: 0;
+            }
+
+            .amostra:hover .mascara { 
+                opacity: 1;
+            }
+
+            .amostra:hover h2,
+            .amostra:hover p {
+                transform: scale(1);
+                opacity: 1;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <header>
+                <h1>Flisol/DF 2014 - Apache Cordova</h1>
+                <h4>por Francisco Ernesto Teixeira - <a href="mailto:fco.ernesto@gmail.com?subject=Flisol/DF 2014 - Apache Cordova">fco.ernesto@gmail.com</a></h4>
+            </header>
+
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-md-8">
+                        <h5>Mapinha<span id="posicao"></span></h5>
+                        <div id="mapa"></div>
+
+                        <div id="foto-area">
+                            <h5>Fotinha: <span id="titulo"></span></h5>
+                            <img id="foto" />
+                            <span id="autor">por Jurandir em 99/99/2013 99:99h</span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h5>Fotinhas <span id="fotos-total"></span></h5>
+                        <div id="galeria"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+        <script src="http://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+        <script>
+            var mapa, fundo, posicao, marcador;
+
+            $(document).ready(function() {
+                mapa = L.map('mapa');
+                mapa.setView([-15.7979586, -47.8697971], 13);
+
+                fundo = new L.TileLayer('http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
+                    maxZoom: 18,
+                    attribution: 'Dados, imagens e informações do mapa providos por <a href="http://open.mapquest.co.uk" target="_blank">MapQuest</a>, <a href = "http://www.openstreetmap.org/" target = "_blank"> OpenStreetMap </a> e colaboradores.',
+                    subdomains: ['otile1', 'otile2', 'otile3', 'otile4']});
+                fundo.addTo(mapa);
+
+                $.ajax({
+                    url: 'foto/lista',
+                    dataType: 'json'
+                }).done(function(lista) {
+                    var galeria, baseUrl;
+
+                    galeria = $('#galeria');
+
+                    $('#fotos-total').text(lista.length);
+
+                    // adiciona as imagens de amostra na página
+                    $.each(lista, function(index, foto) {
+                        $('<div/>')
+                                .addClass('amostra')
+                                .data('original', 'data/foto/original/' + foto.arquivo + '.jpg')
+                                .data('latitude', foto.latitude)
+                                .data('longitude', foto.longitude)
+                                .data('cadastro', foto.cadastro)
+                                .append($('<img>')
+                                        .attr('src', 'data/foto/amostra/' + foto.arquivo + '.jpg'))
+                                .append($('<div/>')
+                                        .addClass('mascara')
+                                        .append($('<h2/>').text(foto.nome))
+                                        .append($('<p/>').text(foto.autor)))
+                                .click(function(e) {
+                                    $('#titulo').text($('h2', this).text());
+                                    $('#foto').attr('src', $(this).data('original'));
+                                    $('#autor').text('por ' + $('p', this).text() + ' em ' + $(this).data('cadastro'));
+                                    $('#foto-area').show();
+
+                                    $('#posicao').text(' (' + $(this).data('latitude') + ', ' + $(this).data('longitude') + ')');
+                                    posicao = new L.LatLng($(this).data('latitude'), $(this).data('longitude'));
+                                    mapa.panTo(posicao);
+
+                                    if (typeof marcador !== 'undefined') {
+                                        mapa.removeLayer(marcador);
+                                    }
+
+                                    marcador = new L.Marker(posicao).addTo(mapa);
+
+                                    e.preventDefault();
+                                })
+                                .appendTo(galeria);
+                    });
+                });
+            });
+        </script>
+    </body>
+</html>
