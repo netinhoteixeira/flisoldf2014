@@ -1,13 +1,5 @@
-fontes/servidor/flisoldf2014/vendor
-fontes/servidor/flisoldf2014/composer.lock
-/fontes/servidor/flisoldf2014/nbproject/private/
-/fontes/movel/flisoldf2014/nbproject/private/
-fontes/servidor/flisoldf2014/data
-/fontes/movel/Teste/nbproject/private/
-/fontes/movel/HTML5Application/nbproject/private/
-/fontes/movel/cadcli/target/
-/fontes/movel/flisoldf2014/node_modules
 .DS_Store
-platforms
-nbproject
-./platforms
+/fontes/movel/flisoldf2014/platforms
+/fontes/movel/flisoldf2014/nbproject
+/fontes/movel/flisoldf2014/plugins
+/fontes/movel/flisoldf2014/node_modules
