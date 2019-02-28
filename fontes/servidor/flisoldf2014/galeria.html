@@ -13,14 +13,6 @@
                 padding: 0;
             }
 
-            @media (max-width: 767px) {
-
-                .col-md-4 {
-                    padding: 0;
-                }
-
-            }
-
             #mapa {
                 height: 250px;
             }
@@ -171,10 +163,10 @@
                 mapa = L.map('mapa');
                 mapa.setView([-15.7979586, -47.8697971], 13);
 
-                fundo = new L.TileLayer('http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {
-                    maxZoom: 18,
-                    attribution: 'Dados, imagens e informações do mapa providos por <a href="http://open.mapquest.co.uk" target="_blank">MapQuest</a>, <a href = "http://www.openstreetmap.org/" target = "_blank"> OpenStreetMap </a> e colaboradores.',
-                    subdomains: ['otile1', 'otile2', 'otile3', 'otile4']});
+                // create the tile layer with correct attribution
+                var osmUrl='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+                var osmAttrib='Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors';
+                var fundo = new L.TileLayer(osmUrl, {minZoom: 8, maxZoom: 18, attribution: osmAttrib});
                 fundo.addTo(mapa);
 
                 $.ajax({
@@ -189,6 +181,18 @@
 
                     // adiciona as imagens de amostra na página
                     $.each(lista, function(index, foto) {
+                        /*
+                         $('<a/>')
+                         .attr('href', 'data/foto/original/' + foto.arquivo + '.jpg')
+                         .attr('title', foto.nome)
+                         .append(
+                         $('<img>').attr('src', 'data/foto/amostra/' + foto.arquivo + '.jpg')
+                         .data('autor', foto.autor)
+                         .data('latitude', foto.latitude)
+                         .data('longitude', foto.longitude)
+                         )
+                         .appendTo(galeria);
+                         */
                         $('<div/>')
                                 .addClass('amostra')
                                 .data('original', 'data/foto/original/' + foto.arquivo + '.jpg')
@@ -205,7 +209,7 @@
                                     $('#titulo').text($('h2', this).text());
                                     $('#foto').attr('src', $(this).data('original'));
                                     $('#autor').text('por ' + $('p', this).text() + ' em ' + $(this).data('cadastro'));
-                                    $('#foto-area').show();
+                                            $('#foto-area').show();
 
                                     $('#posicao').text(' (' + $(this).data('latitude') + ', ' + $(this).data('longitude') + ')');
                                     posicao = new L.LatLng($(this).data('latitude'), $(this).data('longitude'));
@@ -219,8 +223,8 @@
 
                                     e.preventDefault();
                                 })
-                                .appendTo(galeria);
-                    });
+                                        .appendTo(galeria);
+                            });
                 });
             });
         </script>
