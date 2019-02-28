@@ -6,3 +6,8 @@ fontes/servidor/flisoldf2014/data
 /fontes/movel/Teste/nbproject/private/
 /fontes/movel/HTML5Application/nbproject/private/
 /fontes/movel/cadcli/target/
+/fontes/movel/flisoldf2014/node_modules
+.DS_Store
+platforms
+nbproject
+./platforms
