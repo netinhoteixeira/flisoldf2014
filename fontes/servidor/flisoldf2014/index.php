@@ -9,17 +9,13 @@ require 'bootstrap.inc.php';
 $aplicativo = new \Slim\Slim();
 
 $aplicativo->get('/', function () {
-    global $piwikTracker;
-
     header('Content-Type: text/html; charset=utf-8');
 
     require 'galeria.html';
-
-    $piwikTracker->doTrackPageView('Página principal');
 });
 
 $aplicativo->post('/foto/cadastra', function() use ($aplicativo) {
-    global $gerenciadorDeEntidades, $caminhoFotoOriginal, $caminhoFotoAmostra, $piwikTracker;
+    global $gerenciadorDeEntidades, $caminhoFotoOriginal, $caminhoFotoAmostra;
 
     if (!file_exists($caminhoFotoOriginal)) {
         mkdir($caminhoFotoOriginal, 0755, true);
@@ -64,12 +60,10 @@ $aplicativo->post('/foto/cadastra', function() use ($aplicativo) {
     $gerenciadorDeEntidades->flush();
 
     $aplicativo->response->setBody(json_encode($foto->id));
-
-    $piwikTracker->doTrackPageView('Cadastro de Foto');
 });
 
 $aplicativo->get('/foto/lista', function() use ($aplicativo) {
-    global $gerenciadorDeEntidades, $piwikTracker;
+    global $gerenciadorDeEntidades;
 
     $aplicativo->response->headers->set('Content-Type', 'application/json; charset=utf-8');
 
@@ -83,8 +77,6 @@ $aplicativo->get('/foto/lista', function() use ($aplicativo) {
     }
 
     $aplicativo->response->setBody(json_encode($encontrados));
-
-    $piwikTracker->doTrackPageView('Listagem de Foto');
 });
 
 /**
